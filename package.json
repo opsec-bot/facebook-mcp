@@ -1,15 +1,17 @@
 {
   "name": "facebook-marketplace-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "MCP server that lets Claude Code browse Facebook Marketplace using your own logged-in session",
+  "description": "MCP server that lets Claude Code use Facebook Marketplace like you: search, view, message, save, sell",
   "bin": {
     "facebook-marketplace-mcp": "src/server.js"
   },
   "scripts": {
     "start": "node src/server.js",
     "login": "node src/login.js",
+    "pin": "node src/login.js --pin",
+    "smoke": "node src/smoke.js",
     "setup": "npx playwright install chromium",
     "test": "node --test test/*.test.js"
   },

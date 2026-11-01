@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildSearchUrl, parseCardLines, listingIdFrom, parseListingText } from '../src/marketplace.js';
+import { buildSearchUrl, parseCardLines, listingIdFrom, parseListingText, sellerIdFrom } from '../src/marketplace.js';
+import { parseBubbleLabels, threadUrlFrom } from '../src/messaging.js';
 
 test('buildSearchUrl with location and filters', () => {
   const u = new URL(
@@ -20,6 +21,8 @@ test('buildSearchUrl with location and filters', () => {
 test('buildSearchUrl without location / with category', () => {
   assert.equal(buildSearchUrl({ query: 'desk' }), 'https://www.facebook.com/marketplace/search?query=desk&exact=false');
   assert.equal(buildSearchUrl({ category: 'free', location: 'la' }), 'https://www.facebook.com/marketplace/la/free');
+  assert.equal(buildSearchUrl({}), 'https://www.facebook.com/marketplace/');
+  assert.equal(buildSearchUrl({ location: 'San Francisco', maxPrice: 50 }), 'https://www.facebook.com/marketplace/sanfrancisco/?maxPrice=50');
 });
 
 test('parseCardLines handles discounts and badges', () => {
@@ -52,4 +55,18 @@ test('parseListingText', () => {
   assert.equal(r.condition, 'Used - Good');
   assert.equal(r.description, 'Medium frame, new tires.\nPickup only.');
   assert.deepEqual(r.seller, { name: 'Jane Doe', joined: 'Joined Facebook in 2012' });
+});
+
+test('parseBubbleLabels', () => {
+  assert.deepEqual(
+    parseBubbleLabels(['Enter, Message sent 4:01\u202fPM by Lucas: Is it available?', 'Message sent 4:02 PM by You', 'Enter, Message sent 4:01\u202fPM by Lucas: Is it available?', 'Like']),
+    [{ time: '4:01 PM', sender: 'Lucas', text: 'Is it available?' }, { time: '4:02 PM', sender: 'You', text: '[attachment]' }]
+  );
+});
+
+test('thread and seller id parsing', () => {
+  assert.equal(threadUrlFrom('123'), 'https://www.facebook.com/messages/t/123/');
+  assert.equal(threadUrlFrom('https://www.facebook.com/marketplace/t/55/'), 'https://www.facebook.com/marketplace/t/55/');
+  assert.equal(threadUrlFrom('https://www.facebook.com/marketplace/item/5/'), null);
+  assert.equal(sellerIdFrom('https://www.facebook.com/marketplace/profile/42/?ref=x'), '42');
 });
